@@ -2,7 +2,7 @@
  * This is Pubus sample
  */
 
-const Pubus = require('./index');
+const Pubus = require('./index.js').default;
 
 const bus = new Pubus();
 
@@ -28,3 +28,7 @@ setTimeout(() => {
 setTimeout(() => {
   bus.off('ready', 'ready_tag');
 }, 2000);
+
+setTimeout(() => {
+  bus.off('ready');
+},2500)
