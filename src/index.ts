@@ -2,16 +2,24 @@ interface ITaskQueue<T> {
   [key:string]: T[];
 }
 
-type taskItem = {
+type Interval = number | string;
+
+type TaskItem = {
   ts?:Date; // Timestamp
   tag?:string; // Tag
   cb:Function; // Callback function
 }
 
+type ActiveTask = {
+  payload: any[];
+  tasks: TaskItem[];
+  timestamp: number;
+}
+
 
 export default class Pubus {
 
-  private holdQueue:ITaskQueue<taskItem> = {}; // This queue is for registered listener
+  private holdQueue:ITaskQueue<TaskItem> = {}; // This queue is for registered listener
   private activeQueue:any = []; // This quesu is for working or will work listenter
 
   /**
@@ -32,7 +40,7 @@ export default class Pubus {
       this.holdQueue[eventName] = [];
     }
 
-    const task:taskItem = {cb: cbFunc, tag};
+    const task:TaskItem = {cb: cbFunc, tag};
     this.holdQueue[eventName].push(task);
     console.log('Hold Queue', this.holdQueue)
   }
@@ -59,14 +67,19 @@ export default class Pubus {
       // Check hold tasks is vaild
       if(holdTasks.length === 0) {return false;}
       else {
-        const activeTask = {
+
+        const activeTask:ActiveTask = {
           payload,
           tasks:holdTasks,
           timestamp: (new Date).getTime()
         }
 
-        this.activeQueue[eventName].push(activeTask);
-        console.log(this.activeQueue)
+        // this.activeQueue[eventName].push(activeTask);
+        // console.log(this.activeQueue)
+
+        // Start run event loop
+        this.runloop(activeTask, 300);
+
       }
 
     }else {
@@ -84,19 +97,35 @@ export default class Pubus {
 
       if(tag){
         this.holdQueue[eventName].forEach((task, index) => {
-          if(task.tag && task.tag === tag) {
-           this.holdQueue[eventName].splice(index,1);
-          }
+          if(task.tag && task.tag === tag) {this.holdQueue[eventName].splice(index,1);}
         })
       }
       else {
         delete this.holdQueue[eventName];
       }
 
-      console.log('OFF', this.holdQueue)
+      console.log('[Remove Listenter]', this.holdQueue)
 
     } else {
       // Silnce
+    }
+  }
+
+  /**
+   *
+   * @param activeTasks
+   */
+  private runloop(activeTask: ActiveTask, delay: Interval) {
+
+    const task:TaskItem = activeTask.tasks.shift() as TaskItem;
+    const cb = task.cb as Function;
+    const payload = activeTask.payload as any[];
+    cb(...payload);
+
+    if(activeTask.tasks.length > 0) {setTimeout(this.runloop, delay, activeTask, delay)}
+    else {
+      // End
+      console.log('Runloop End')
     }
   }
 

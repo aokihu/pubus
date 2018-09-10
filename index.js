@@ -48,8 +48,10 @@ class Pubus {
                     tasks: holdTasks,
                     timestamp: (new Date).getTime()
                 };
-                this.activeQueue[eventName].push(activeTask);
-                console.log(this.activeQueue);
+                // this.activeQueue[eventName].push(activeTask);
+                // console.log(this.activeQueue)
+                // Start run event loop
+                this.runloop(activeTask, 300);
             }
         }
         else {
@@ -73,10 +75,27 @@ class Pubus {
             else {
                 delete this.holdQueue[eventName];
             }
-            console.log('OFF', this.holdQueue);
+            console.log('[Remove Listenter]', this.holdQueue);
         }
         else {
             // Silnce
+        }
+    }
+    /**
+     *
+     * @param activeTasks
+     */
+    runloop(activeTask, delay) {
+        const task = activeTask.tasks.shift();
+        const cb = task.cb;
+        const payload = activeTask.payload;
+        cb(...payload);
+        if (activeTask.tasks.length > 0) {
+            setTimeout(this.runloop, delay, activeTask, delay);
+        }
+        else {
+            // End
+            console.log('Runloop End');
         }
     }
 }

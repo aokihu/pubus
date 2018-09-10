@@ -21,8 +21,8 @@ setTimeout(() => {
 }, 1500);
 
 setTimeout(() => {
-  console.log(`I'm fire ready!`);
   bus.emit('ready');
+  console.log(`I'm fire ready!`);
 }, 3000);
 
 setTimeout(() => {
