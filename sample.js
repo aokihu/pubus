@@ -17,11 +17,11 @@ const bus = new Pubus(5000);
 bus.on('ready', (word) => {console.log('Bus is ready!', word)}, 'ready_tag');
 
 setTimeout(() => {
-  bus.emit('ready');
+  bus.emit('ready','Hello World 1');
 }, 1500);
 
 setTimeout(() => {
-  bus.emit('ready','Hello World!');
+  bus.emit('ready','Hello World 2');
   console.log(`I'm fire ready!`);
 }, 3000);
 
@@ -32,3 +32,18 @@ setTimeout(() => {
 setTimeout(() => {
   bus.off('ready');
 },2500)
+
+// Event Blood Test
+
+bus.on('blood', (index) => {
+  console.log('blood', index);
+});
+
+setTimeout(() => {
+  console.log('Event Blood Sample');
+
+  [...Array(10).keys()].map(index => {
+    bus.emit('blood', index);
+  })
+
+}, 5000)
