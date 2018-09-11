@@ -1,32 +1,16 @@
-interface ITaskQueue<T> {
-  [key:string]: T[];
-}
-
-type Interval = number | string;
-
-type TaskItem = {
-  ts?:Date; // Timestamp
-  tag?:string; // Tag
-  cb:Function; // Callback function
-}
-
-type ActiveTask = {
-  payload: any[];
-  tasks: TaskItem[];
-  timestamp: number;
-}
-
+import {ITaskQueue, TaskItem, ActiveTask, Interval} from './index.d';
 
 export default class Pubus {
-
+  private throttle: number; // the time of waitting every task between, the unit is 'ms'
   private holdQueue:ITaskQueue<TaskItem> = {}; // This queue is for registered listener
   private activeQueue:any = []; // This quesu is for working or will work listenter
 
   /**
    * @constructor
+   * @param throttle the time of waitting every task between, the unit is 'ms'
    */
-  constructor() {
-
+  constructor(throttle = 300) {
+    this.throttle = throttle;
   }
 
   /**
@@ -42,7 +26,6 @@ export default class Pubus {
 
     const task:TaskItem = {cb: cbFunc, tag};
     this.holdQueue[eventName].push(task);
-    console.log('Hold Queue', this.holdQueue)
   }
 
   /**
@@ -78,8 +61,7 @@ export default class Pubus {
         // console.log(this.activeQueue)
 
         // Start run event loop
-        this.runloop(activeTask, 300);
-
+        this.runloop(activeTask, this.throttle);
       }
 
     }else {
@@ -104,8 +86,6 @@ export default class Pubus {
         delete this.holdQueue[eventName];
       }
 
-      console.log('[Remove Listenter]', this.holdQueue)
-
     } else {
       // Silnce
     }
@@ -123,10 +103,6 @@ export default class Pubus {
     cb(...payload);
 
     if(activeTask.tasks.length > 0) {setTimeout(this.runloop, delay, activeTask, delay)}
-    else {
-      // End
-      console.log('Runloop End')
-    }
   }
 
 }

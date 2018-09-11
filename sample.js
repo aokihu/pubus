@@ -4,7 +4,7 @@
 
 const Pubus = require('./index.js').default;
 
-const bus = new Pubus();
+const bus = new Pubus(5000);
 
 /**
  * Example 1
@@ -14,14 +14,14 @@ const bus = new Pubus();
  * it will be used in remove listener
  *
  */
-bus.on('ready', () => {console.log('Bus is ready!')}, 'ready_tag');
+bus.on('ready', (word) => {console.log('Bus is ready!', word)}, 'ready_tag');
 
 setTimeout(() => {
   bus.emit('ready');
 }, 1500);
 
 setTimeout(() => {
-  bus.emit('ready');
+  bus.emit('ready','Hello World!');
   console.log(`I'm fire ready!`);
 }, 3000);
 

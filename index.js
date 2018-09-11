@@ -3,10 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Pubus {
     /**
      * @constructor
+     * @param throttle the time of waitting every task between, the unit is 'ms'
      */
-    constructor() {
+    constructor(throttle = 300) {
         this.holdQueue = {}; // This queue is for registered listener
         this.activeQueue = []; // This quesu is for working or will work listenter
+        this.throttle = throttle;
     }
     /**
      * Register an event listenter
@@ -20,7 +22,6 @@ class Pubus {
         }
         const task = { cb: cbFunc, tag };
         this.holdQueue[eventName].push(task);
-        console.log('Hold Queue', this.holdQueue);
     }
     /**
      * Registe an event listenter
@@ -51,7 +52,7 @@ class Pubus {
                 // this.activeQueue[eventName].push(activeTask);
                 // console.log(this.activeQueue)
                 // Start run event loop
-                this.runloop(activeTask, 300);
+                this.runloop(activeTask, this.throttle);
             }
         }
         else {
@@ -75,7 +76,6 @@ class Pubus {
             else {
                 delete this.holdQueue[eventName];
             }
-            console.log('[Remove Listenter]', this.holdQueue);
         }
         else {
             // Silnce
@@ -92,10 +92,6 @@ class Pubus {
         cb(...payload);
         if (activeTask.tasks.length > 0) {
             setTimeout(this.runloop, delay, activeTask, delay);
-        }
-        else {
-            // End
-            console.log('Runloop End');
         }
     }
 }
