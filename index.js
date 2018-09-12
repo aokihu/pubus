@@ -38,7 +38,7 @@ class Pubus {
                 this.activeQueue[eventName] = [];
             }
             // Construct active task OBJECTS
-            const holdTasks = this.holdQueue[eventName];
+            const holdTasks = [...this.holdQueue[eventName]];
             // Check hold tasks is vaild
             if (holdTasks.length === 0) {
                 return false;
@@ -49,10 +49,11 @@ class Pubus {
                     tasks: holdTasks,
                     timestamp: (new Date).getTime()
                 };
-                // this.activeQueue[eventName].push(activeTask);
-                // console.log(this.activeQueue)
+                console.log('Emit Active Tasks', activeTask.tasks);
+                this.activeQueue[eventName].push(activeTask);
+                console.log(this.activeQueue);
                 // Start run event loop
-                this.runloop(activeTask, this.throttle);
+                this.runloop(this.activeQueue[eventName], this.throttle);
             }
         }
         else {
@@ -85,14 +86,35 @@ class Pubus {
      *
      * @param activeTasks
      */
-    runloop(activeTask, delay) {
-        const task = activeTask.tasks.shift();
-        const cb = task.cb;
+    runloop(activeQueue, delay) {
+        const activeTask = activeQueue.shift();
+        const tasks = activeTask.tasks;
         const payload = activeTask.payload;
+<<<<<<< HEAD
         cb([...payload]);
         if (activeTask.tasks.length > 0) {
             setTimeout(this.runloop, delay, activeTask, delay);
         }
+=======
+        tasks.map((task, index) => {
+            const cb = task.cb;
+            setTimeout(() => {
+                cb(...payload);
+            }, (index * delay));
+        });
+        console.log('Active Queue Length', activeQueue.length);
+        // if(activeQueue.length > 0) {
+        //   setTimeout(this.runloop, delay, activeQueue, delay);
+        // }
+        // const task:TaskItem = activeTask.tasks.shift() as TaskItem;
+        // const cb = task.cb as Function;
+        // const payload = activeTask.payload as any[];
+        // // cb.apply(this, [...payload]);
+        // cb(...payload)
+        // if(activeTask.tasks.length > 0) {
+        //   setTimeout(this.runloop, delay, activeTask, delay)
+        // }
+>>>>>>> a3a19f155023e19800fa65d8bd2a01fd84150b0c
     }
 }
 exports.default = Pubus;

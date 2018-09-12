@@ -46,7 +46,7 @@ export default class Pubus {
       }
 
       // Construct active task OBJECTS
-      const holdTasks = this.holdQueue[eventName];
+      const holdTasks = [...this.holdQueue[eventName]];
 
       // Check hold tasks is vaild
       if(holdTasks.length === 0) {return false;}
@@ -58,11 +58,12 @@ export default class Pubus {
           timestamp: (new Date).getTime()
         }
 
-        // this.activeQueue[eventName].push(activeTask);
-        // console.log(this.activeQueue)
+        console.log('Emit Active Tasks', activeTask.tasks)
+
+        this.activeQueue[eventName].push(activeTask);
 
         // Start run event loop
-        this.runloop(activeTask, this.throttle);
+        this.runloop(this.activeQueue[eventName], this.throttle);
       }
 
     }else {
@@ -96,14 +97,34 @@ export default class Pubus {
    *
    * @param activeTasks
    */
-  private runloop(activeTask: ActiveTask, delay: Interval) {
+  private runloop(activeQueue: ActiveTask[], delay: number) {
 
-    const task:TaskItem = activeTask.tasks.shift() as TaskItem;
-    const cb = task.cb as Function;
-    const payload = activeTask.payload as any[];
-    cb.apply()
+    const activeTask = activeQueue.shift() as ActiveTask;
+    const tasks: TaskItem[] = activeTask.tasks;
+    const payload = activeTask.payload;
 
-    if(activeTask.tasks.length > 0) {setTimeout(this.runloop, delay, activeTask, delay)}
+    tasks.map((task,index) => {
+      const cb = task.cb;
+      setTimeout(() => {
+        cb(...payload);
+      }, (index * delay) )
+
+    });
+
+    console.log('Active Queue Length', activeQueue.length)
+    // if(activeQueue.length > 0) {
+    //   setTimeout(this.runloop, delay, activeQueue, delay);
+    // }
+
+    // const task:TaskItem = activeTask.tasks.shift() as TaskItem;
+    // const cb = task.cb as Function;
+    // const payload = activeTask.payload as any[];
+    // // cb.apply(this, [...payload]);
+    // cb(...payload)
+
+    // if(activeTask.tasks.length > 0) {
+    //   setTimeout(this.runloop, delay, activeTask, delay)
+    // }
   }
 
 }
