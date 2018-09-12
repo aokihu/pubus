@@ -1,6 +1,9 @@
 import {ITaskQueue, TaskItem, ActiveTask, ActiveQueues, ActiveQueue} from './index.d';
 
 export default class Pubus {
+
+  static throttle = 30; // The default throttle interval 30ms
+
   private throttle: number; // the time of waitting every task between, the unit is 'ms'
   private holdQueue:ITaskQueue<TaskItem> = {}; // This queue is for registered listener
   private activeQueues:ActiveQueues; // This quesu is for working or will work listenter
@@ -9,7 +12,7 @@ export default class Pubus {
    * @constructor
    * @param throttle the time of waitting every task between, the unit is 'ms'
    */
-  constructor(throttle = 300) {
+  constructor(throttle = Pubus.throttle) {
     this.throttle = throttle;
     this.activeQueues = {} as ActiveQueues;
   }
