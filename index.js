@@ -7,8 +7,8 @@ class Pubus {
      */
     constructor(throttle = 300) {
         this.holdQueue = {}; // This queue is for registered listener
-        this.activeQueue = []; // This quesu is for working or will work listenter
         this.throttle = throttle;
+        this.activeQueues = {};
     }
     /**
      * Register an event listenter
@@ -34,8 +34,8 @@ class Pubus {
     }
     emit(eventName, ...payload) {
         if (this.holdQueue[eventName]) {
-            if (!this.activeQueue[eventName]) {
-                this.activeQueue[eventName] = [];
+            if (!this.activeQueues[eventName]) {
+                this.activeQueues[eventName] = { running: false, activeTasks: [] };
             }
             // Construct active task OBJECTS
             const holdTasks = [...this.holdQueue[eventName]];
@@ -44,16 +44,21 @@ class Pubus {
                 return false;
             }
             else {
-                const activeTask = {
-                    payload,
-                    tasks: holdTasks,
-                    timestamp: (new Date).getTime()
-                };
-                console.log('Emit Active Tasks', activeTask.tasks);
-                this.activeQueue[eventName].push(activeTask);
-                console.log(this.activeQueue);
+                // const activeTask:ActiveTask = {
+                //   payload,
+                //   task:holdTasks,
+                //   timestamp: (new Date).getTime()
+                // }
+                holdTasks.map(holdTask => {
+                    const activeTask = {
+                        payload,
+                        task: holdTask,
+                        timestamp: (new Date).getTime()
+                    };
+                    this.activeQueues[eventName].activeTasks.push(activeTask);
+                });
                 // Start run event loop
-                this.runloop(this.activeQueue[eventName], this.throttle);
+                this.emitEvent(eventName);
             }
         }
         else {
@@ -84,28 +89,29 @@ class Pubus {
     }
     /**
      *
+     * @param eventName
+     */
+    emitEvent(eventName) {
+        if (!this.activeQueues[eventName].running) {
+            this.activeQueues[eventName].running = true;
+            this.runloop(this.activeQueues[eventName], this.throttle);
+        }
+    }
+    /**
+     *
      * @param activeTasks
      */
     runloop(activeQueue, delay) {
-        const activeTask = activeQueue.shift();
-        const tasks = activeTask.tasks;
-        const payload = activeTask.payload;
-<<<<<<< HEAD
-        cb([...payload]);
-        if (activeTask.tasks.length > 0) {
-            setTimeout(this.runloop, delay, activeTask, delay);
+        if (activeQueue.activeTasks.length > 0) {
+            const at = activeQueue.activeTasks.shift();
+            const cb = at.task.cb;
+            const payload = at.payload;
+            cb(...payload);
+            setTimeout(() => { this.runloop(activeQueue, delay); }, delay);
         }
-=======
-        tasks.map((task, index) => {
-            const cb = task.cb;
-            setTimeout(() => {
-                cb(...payload);
-            }, (index * delay));
-        });
-        console.log('Active Queue Length', activeQueue.length);
-        // if(activeQueue.length > 0) {
-        //   setTimeout(this.runloop, delay, activeQueue, delay);
-        // }
+        else {
+            activeQueue.running = false;
+        }
         // const task:TaskItem = activeTask.tasks.shift() as TaskItem;
         // const cb = task.cb as Function;
         // const payload = activeTask.payload as any[];
@@ -114,7 +120,6 @@ class Pubus {
         // if(activeTask.tasks.length > 0) {
         //   setTimeout(this.runloop, delay, activeTask, delay)
         // }
->>>>>>> a3a19f155023e19800fa65d8bd2a01fd84150b0c
     }
 }
 exports.default = Pubus;

@@ -4,6 +4,16 @@ export declare interface ITaskQueue<T> {
 
 export declare type Interval = number | string;
 
+
+export declare interface ActiveQueues {
+  [key: string]: ActiveQueue;
+}
+
+export declare type ActiveQueue = {
+  running: boolean; // Queue is running
+  activeTasks: ActiveTask[];
+}
+
 export declare type TaskItem = {
   ts?:Date; // Timestamp
   tag?:string; // Tag
@@ -12,6 +22,6 @@ export declare type TaskItem = {
 
 export declare type ActiveTask = {
   payload: any[];
-  tasks: TaskItem[];
+  task: TaskItem;
   timestamp: number;
 }

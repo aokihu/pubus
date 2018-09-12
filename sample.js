@@ -4,7 +4,7 @@
 
 const Pubus = require('./index.js').default;
 
-const bus = new Pubus(5000);
+const bus = new Pubus();
 
 /**
  * Example 1

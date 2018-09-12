@@ -1,9 +1,9 @@
-import {ITaskQueue, TaskItem, ActiveTask, Interval} from './index.d';
+import {ITaskQueue, TaskItem, ActiveTask, ActiveQueues, ActiveQueue} from './index.d';
 
 export default class Pubus {
   private throttle: number; // the time of waitting every task between, the unit is 'ms'
   private holdQueue:ITaskQueue<TaskItem> = {}; // This queue is for registered listener
-  private activeQueue:any = []; // This quesu is for working or will work listenter
+  private activeQueues:ActiveQueues; // This quesu is for working or will work listenter
 
   /**
    * @constructor
@@ -11,6 +11,7 @@ export default class Pubus {
    */
   constructor(throttle = 300) {
     this.throttle = throttle;
+    this.activeQueues = {} as ActiveQueues;
   }
 
   /**
@@ -41,8 +42,8 @@ export default class Pubus {
   public emit(eventName: string, ...payload:any[]){
 
     if(this.holdQueue[eventName]){
-      if(!this.activeQueue[eventName]){
-        this.activeQueue[eventName] = [];
+      if(!this.activeQueues[eventName]){
+        this.activeQueues[eventName] = {running: false, activeTasks:[]} as ActiveQueue;
       }
 
       // Construct active task OBJECTS
@@ -52,18 +53,25 @@ export default class Pubus {
       if(holdTasks.length === 0) {return false;}
       else {
 
-        const activeTask:ActiveTask = {
-          payload,
-          tasks:holdTasks,
-          timestamp: (new Date).getTime()
-        }
+        // const activeTask:ActiveTask = {
+        //   payload,
+        //   task:holdTasks,
+        //   timestamp: (new Date).getTime()
+        // }
 
-        console.log('Emit Active Tasks', activeTask.tasks)
+        holdTasks.map(holdTask => {
+          const activeTask:ActiveTask = {
+            payload,
+            task: holdTask,
+            timestamp: (new Date).getTime()
+          }
 
-        this.activeQueue[eventName].push(activeTask);
+          this.activeQueues[eventName].activeTasks.push(activeTask);
+        });
+
 
         // Start run event loop
-        this.runloop(this.activeQueue[eventName], this.throttle);
+        this.emitEvent(eventName);
       }
 
     }else {
@@ -94,27 +102,34 @@ export default class Pubus {
   }
 
   /**
+   * 
+   * @param eventName 
+   */
+  private emitEvent(eventName:string) {
+    if(!this.activeQueues[eventName].running) {
+      this.activeQueues[eventName].running = true;
+      this.runloop(this.activeQueues[eventName], this.throttle);
+    }
+  }
+
+  /**
    *
    * @param activeTasks
    */
-  private runloop(activeQueue: ActiveTask[], delay: number) {
+  private runloop(activeQueue: ActiveQueue, delay: number) {
 
-    const activeTask = activeQueue.shift() as ActiveTask;
-    const tasks: TaskItem[] = activeTask.tasks;
-    const payload = activeTask.payload;
+    if(activeQueue.activeTasks.length > 0) {
 
-    tasks.map((task,index) => {
-      const cb = task.cb;
-      setTimeout(() => {
+        const at:ActiveTask = activeQueue.activeTasks.shift() as ActiveTask;
+        const cb = at.task.cb;
+        const payload = at.payload;
         cb(...payload);
-      }, (index * delay) )
 
-    });
-
-    console.log('Active Queue Length', activeQueue.length)
-    // if(activeQueue.length > 0) {
-    //   setTimeout(this.runloop, delay, activeQueue, delay);
-    // }
+      
+        setTimeout(() => {this.runloop(activeQueue, delay)}, delay);
+    }else {
+      activeQueue.running = false;
+    }
 
     // const task:TaskItem = activeTask.tasks.shift() as TaskItem;
     // const cb = task.cb as Function;
