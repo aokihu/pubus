@@ -1,6 +1,6 @@
 {
   "name": "pubus",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "pubus is an event bus sytem for Node.js.",
   "main": "index.js",
   "types": "index.d.ts",
