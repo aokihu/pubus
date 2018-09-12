@@ -133,16 +133,6 @@ export default class Pubus {
     }else {
       activeQueue.running = false;
     }
-
-    // const task:TaskItem = activeTask.tasks.shift() as TaskItem;
-    // const cb = task.cb as Function;
-    // const payload = activeTask.payload as any[];
-    // // cb.apply(this, [...payload]);
-    // cb(...payload)
-
-    // if(activeTask.tasks.length > 0) {
-    //   setTimeout(this.runloop, delay, activeTask, delay)
-    // }
   }
 
 }

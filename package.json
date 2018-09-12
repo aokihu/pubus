@@ -1,11 +1,11 @@
 {
   "name": "pubus",
-  "version": "0.2.1",
+  "version": "0.2.5",
   "description": "pubus is an event bus sytem for Node.js.",
   "main": "index.js",
-  "types":"./src/index.d.ts",
+  "types": "index.d.ts",
   "scripts": {
-    "build":"tsc ./",
+    "build":"tsc",
     "test": "node ./sample.js"
   },
   "keywords": ["event", "bus", "message"],
