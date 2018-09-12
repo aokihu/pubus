@@ -39,6 +39,7 @@ export default class Pubus {
   }
 
   public emit(eventName: string, ...payload:any[]){
+
     if(this.holdQueue[eventName]){
       if(!this.activeQueue[eventName]){
         this.activeQueue[eventName] = [];
@@ -100,7 +101,7 @@ export default class Pubus {
     const task:TaskItem = activeTask.tasks.shift() as TaskItem;
     const cb = task.cb as Function;
     const payload = activeTask.payload as any[];
-    cb(...payload);
+    cb.apply()
 
     if(activeTask.tasks.length > 0) {setTimeout(this.runloop, delay, activeTask, delay)}
   }

@@ -89,7 +89,7 @@ class Pubus {
         const task = activeTask.tasks.shift();
         const cb = task.cb;
         const payload = activeTask.payload;
-        cb(...payload);
+        cb([...payload]);
         if (activeTask.tasks.length > 0) {
             setTimeout(this.runloop, delay, activeTask, delay);
         }
