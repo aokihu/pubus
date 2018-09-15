@@ -56,12 +56,6 @@ export default class Pubus {
       if(holdTasks.length === 0) {return false;}
       else {
 
-        // const activeTask:ActiveTask = {
-        //   payload,
-        //   task:holdTasks,
-        //   timestamp: (new Date).getTime()
-        // }
-
         holdTasks.map(holdTask => {
           const activeTask:ActiveTask = {
             payload,
