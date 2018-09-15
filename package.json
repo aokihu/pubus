@@ -1,6 +1,6 @@
 {
   "name": "pubus",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "pubus is an event bus sytem for Node.js.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -10,5 +10,14 @@
   },
   "keywords": ["event", "bus", "message"],
   "author": "aokihu",
+  "homepage": "https://github.com/aokihu/pubus",
+  "bugs": {
+    "url": "https://github.com/aokihu/pubus/issues",
+    "email": "aokihu@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aokihu/pubus.git"
+  },
   "license": "MIT"
 }
